@@ -233,24 +233,26 @@ ERASER  ENDP
 ;Draw Line Section
 ;-------------------------------
 DRAW_LINE  PROC  NEAR
-        ; Save all registers
+        ; Save Registers
         PUSHA               
 
-        ; Calculate absolute deltas
+        ; Calculate Delta's
         MOV AX, [POSITION_X2]
         SUB AX, [POSITION_X1]
         JNC CALC_DELTA_X
         NEG AX
-    CALC_DELTA_X:
-        MOV [DELTA_X], AX
 
+    CALC_DELTA_X:
+
+        MOV [DELTA_X], AX
         MOV AX, [POSITION_Y2]
         SUB AX, [POSITION_Y1]
         JNC CALC_DELTA_Y
         NEG AX
-    CALC_DELTA_Y:
-        MOV [DELTA_Y], AX
 
+    CALC_DELTA_Y:
+
+        MOV [DELTA_Y], AX
         ; Choose algorithm based on slope
         MOV AX, [DELTA_X]
         CMP AX, [DELTA_Y]
@@ -263,7 +265,7 @@ DRAW_LINE  PROC  NEAR
         CALL DRAW_HLINE
 
     DRAW_EXIT:
-        ; Restore all registers
+        ; Restore Registers
         POPA         
 
         RET
@@ -283,7 +285,7 @@ DRAW_HLINE  PROC  NEAR
         MOV [POSITION_Y1], AX
 
     NO_SWAP_X:
-        ; Calculate dx and dy
+    
         MOV AX, [POSITION_X2]
         SUB AX, [POSITION_X1]
         MOV [DELTA_X], AX
@@ -298,41 +300,44 @@ DRAW_HLINE  PROC  NEAR
         JGE Y_POSITIVE
         NEG BX
         NEG AX
+
     Y_POSITIVE:
+
         MOV [Y_DIRECTION], BX
         MOV [DELTA_Y], AX
 
-        ; Initialize decision parameter
+        ; Initialize Decision
         MOV AX, [DELTA_Y]
         SHL AX, 1
         SUB AX, [DELTA_X]
         MOV [DECISION], AX
 
-        ; Initialize coordinates
+        ;Initialize Positions
         MOV CX, [POSITION_X1]
         MOV DX, [POSITION_Y1]
 
     DRAW_LOOP_H:
-        ; Plot pixel
+
         FILL_PIXEL PAINT_COLOR
 
-        ; Check end condition
+        ;End Condition
         CMP CX, [POSITION_X2]
         JE END_HLINE
 
-        ; Update decision parameter
+        ;Update Decision
         MOV AX, [DECISION]
         CMP AX, 0
         JL UPDATE_X
 
-        ; Move in Y direction
+        ;Move in Y direction
         ADD DX, [Y_DIRECTION]
         SUB AX, [DELTA_X]
         SUB AX, [DELTA_X]
         MOV [DECISION], AX
 
     UPDATE_X:
-        ; Move in X direction
+    
+        ;Move in X direction
         INC CX
         ADD AX, [DELTA_Y]
         ADD AX, [DELTA_Y]
@@ -345,7 +350,7 @@ DRAW_HLINE  PROC  NEAR
 DRAW_HLINE ENDP
 
 ;Draw Vertical Line
-DRAW_VERTICAL  PROC  NEAR
+DRAW_VERTICAL PROC NEAR
         PUSHA
 
         MOV AX, [POSITION_Y1]
@@ -358,6 +363,7 @@ DRAW_VERTICAL  PROC  NEAR
         MOV [POSITION_X1], AX
 
     NO_SWAP_Y:
+
         ; Calculate DX And DY
         MOV AX, [POSITION_Y2]
         SUB AX, [POSITION_Y1]
@@ -373,17 +379,19 @@ DRAW_VERTICAL  PROC  NEAR
         JGE X_POSITIVE
         NEG BX
         NEG AX
+
     X_POSITIVE:
+
         MOV [X_DIRECTION], BX
         MOV [DELTA_X], AX
 
-        ; Initialize decision parameter
+        ; Init Decision
         MOV AX, [DELTA_X]
         SHL AX, 1
         SUB AX, [DELTA_Y]
         MOV [DECISION], AX
 
-        ; Initialize Positions
+        ; Init Positions
         MOV CX, [POSITION_X1]
         MOV DX, [POSITION_Y1]
 
@@ -399,7 +407,7 @@ DRAW_VERTICAL  PROC  NEAR
         CMP AX, 0
         JL UPDATE_Y
 
-        ;Move in X direction
+        ;Move X Direction
         ADD CX, [X_DIRECTION]
         SUB AX, [DELTA_Y]
         SUB AX, [DELTA_Y]
@@ -407,7 +415,7 @@ DRAW_VERTICAL  PROC  NEAR
 
     UPDATE_Y:
 
-        ;Move in Y direction
+        ;Move Y Direction
         INC DX
         ADD AX, [DELTA_X]
         ADD AX, [DELTA_X]
