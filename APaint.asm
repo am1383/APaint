@@ -160,3 +160,22 @@ ENDM
             CMP     BX, 02H
             JE      LEFT_CLICK
 
+    SELECT_COLOR:
+            CHOSE_COLOR
+            JMP  PAINT_LOOP
+
+    RIGHT_CLICK:
+
+        ;Store Mouse Pos
+        MOV [POS_X1], CX
+        MOV [POS_Y1], DX
+
+    WAIT_RELEASE:
+
+        ;Checking For button release
+        MOV   AX, 3
+        INT   33H
+        CMP   BX, 01H
+        JE    WAIT_RELEASE
+
+        SHR   CX, 1
