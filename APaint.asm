@@ -45,7 +45,7 @@ DRAW_COLOR_BOX  MACRO   COLOR, START_ROW, END_ROW
         JB      ROW_LOOP        
 ENDM
 
-CHOSE_COLOR    MACRO
+SWITCH_COLOR    MACRO
         LOCAL  Case1, Case2, Case3, Case4, Done
 
         CMP    DX, 20          
@@ -162,7 +162,7 @@ ENDM
 
     SELECT_COLOR:
 
-        CHOSE_COLOR
+        SWITCH_COLOR
         JMP  PAINT_LOOP
 
     RIGHT_CLICK:
@@ -266,3 +266,156 @@ DRAW_LINE  PROC  NEAR
 
         RET
 DRAW_LINE ENDP
+
+DRAW_HLINE  PROC  NEAR
+        PUSHA
+
+        ; Swap points if needed
+        MOV AX, [POS_X1]
+        CMP AX, [POS_X2]
+        JL NO_SWAP_X
+        XCHG AX, [POS_X2]
+        MOV [POS_X1], AX
+        MOV AX, [POS_Y1]
+        XCHG AX, [POS_Y2]
+        MOV [POS_Y1], AX
+
+    NO_SWAP_X:
+        ; Calculate dx and dy
+        MOV AX, [POS_X2]
+        SUB AX, [POS_X1]
+        MOV [DELTA_X], AX
+        
+        MOV AX, [POS_Y2]
+        SUB AX, [POS_Y1]
+        MOV [DELTA_Y], AX
+
+        ; Determine Y direction
+        MOV BX, 1
+        CMP AX, 0
+        JGE Y_POSITIVE
+        NEG BX
+        NEG AX
+    Y_POSITIVE:
+        MOV [Y_DIR], BX
+        MOV [DELTA_Y], AX
+
+        ; Initialize decision parameter
+        MOV AX, [DELTA_Y]
+        SHL AX, 1
+        SUB AX, [DELTA_X]
+        MOV [DECISION], AX
+
+        ; Initialize coordinates
+        MOV CX, [POS_X1]
+        MOV DX, [POS_Y1]
+
+    DRAW_LOOP_H:
+        ; Plot pixel
+        FILL_PIXEL PAINT_COLOR
+
+        ; Check end condition
+        CMP CX, [POS_X2]
+        JE END_HLINE
+
+        ; Update decision parameter
+        MOV AX, [DECISION]
+        CMP AX, 0
+        JL UPDATE_X
+
+        ; Move in Y direction
+        ADD DX, [Y_DIR]
+        SUB AX, [DELTA_X]
+        SUB AX, [DELTA_X]
+        MOV [DECISION], AX
+
+    UPDATE_X:
+        ; Move in X direction
+        INC CX
+        ADD AX, [DELTA_Y]
+        ADD AX, [DELTA_Y]
+        MOV [DECISION], AX
+        JMP DRAW_LOOP_H
+
+    END_HLINE:
+        POPA
+        RET
+DRAW_HLINE ENDP
+
+;----------------------------------
+; VERTICAL LINE ALGORITHM (|dy| >= |dx|)
+;----------------------------------
+DRAW_VERTICAL   PROC    NEAR
+        PUSHA
+
+        ; Swap points if needed
+        MOV AX, [POS_Y1]
+        CMP AX, [POS_Y2]
+        JL NO_SWAP_Y
+        XCHG AX, [POS_Y2]
+        MOV [POS_Y1], AX
+        MOV AX, [POS_X1]
+        XCHG AX, [POS_X2]
+        MOV [POS_X1], AX
+
+    NO_SWAP_Y:
+        ; Calculate dx and dy
+        MOV AX, [POS_Y2]
+        SUB AX, [POS_Y1]
+        MOV [DELTA_Y], AX
+        
+        MOV AX, [POS_X2]
+        SUB AX, [POS_X1]
+        MOV [DELTA_X], AX
+
+        ; Determine X direction
+        MOV BX, 1
+        CMP AX, 0
+        JGE X_POSITIVE
+        NEG BX
+        NEG AX
+    X_POSITIVE:
+        MOV [X_DIR], BX
+        MOV [DELTA_X], AX
+
+        ; Initialize decision parameter
+        MOV AX, [DELTA_X]
+        SHL AX, 1
+        SUB AX, [DELTA_Y]
+        MOV [DECISION], AX
+
+        ; Initialize coordinates
+        MOV CX, [POS_X1]
+        MOV DX, [POS_Y1]
+
+    DRAW_LOOP_V:
+        ; Plot pixel
+        FILL_PIXEL PAINT_COLOR
+
+        ; Check end condition
+        CMP DX, [POS_Y2]
+        JE END_VLINE
+
+        ; Update decision parameter
+        MOV AX, [DECISION]
+        CMP AX, 0
+        JL UPDATE_Y
+
+        ; Move in X direction
+        ADD CX, [X_DIR]
+        SUB AX, [DELTA_Y]
+        SUB AX, [DELTA_Y]
+        MOV [DECISION], AX
+
+    UPDATE_Y:
+        ; Move in Y direction
+        INC DX
+        ADD AX, [DELTA_X]
+        ADD AX, [DELTA_X]
+        MOV [DECISION], AX
+        JMP DRAW_LOOP_V
+
+    END_VLINE:
+        POPA
+        RET
+DRAW_VERTICAL ENDP
