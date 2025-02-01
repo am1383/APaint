@@ -1,5 +1,6 @@
 ;===============================
 ;APaint Assembly Final Project
+;Seyed Amir Mohammad Mousavi
 ;===============================
 
 ;General Marco Section
@@ -12,7 +13,7 @@ CLEAR_SCREEN  MACRO
         INT   10H   
 ENDM
 
-DISPLAY_MESSAGE MACRO    MESSAGE
+DISPLAY_MESSAGE  MACRO   MESSAGE
         MOV   DX, OFFSET MESSAGE
         MOV   AH, 09H
         INT   21H
@@ -85,10 +86,10 @@ ENDM
     POSITION_Y1   DW  ?
     POSITION_X2   DW  ?
     POSITION_Y2   DW  ?
-    DELTA_X       DW  ?
-    DELTA_Y       DW  ? 
     X_DIRECTION   DW  ?
     Y_DIRECTION   DW  ?
+    DELTA_X       DW  ?
+    DELTA_Y       DW  ? 
     DECISION      DW  ?
 
     WHITE         EQU  0FH
@@ -182,6 +183,7 @@ ENDM
         CMP   BX, 01H
         JE    WAIT_RELEASE
 
+        ;Video Mode For 320*200
         SHR   CX, 1
 
         MOV   [POSITION_X2], CX
@@ -205,7 +207,7 @@ ENDM
         INT   21H
 MAIN    ENDP
 
-;Earaser Section
+;Eraser Section
 ;-------------------------------
 ERASER  PROC  NEAR
         
@@ -297,7 +299,7 @@ DRAW_HLINE  PROC  NEAR
         SUB   AX, [POSITION_Y1]
         MOV   [DELTA_Y], AX
 
-        ;Determine Y direction
+        ;Determine Y Direction
         MOV   BX, 1
         CMP   AX, 0
         JGE   Y_POSITIVE
