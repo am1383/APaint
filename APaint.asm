@@ -12,7 +12,7 @@ CLEAR_SCREEN  MACRO
         INT   10H   
 ENDM
 
-DISPLAY_MESSAGE MACRO   MESSAGE
+DISPLAY_MESSAGE MACRO    MESSAGE
         MOV   DX, OFFSET MESSAGE
         MOV   AH, 09H
         INT   21H
@@ -39,13 +39,13 @@ DRAW_COLOR_BOX  MACRO   COLOR, START_ROW, END_ROW
         MOV     CX, 16           
     COL_LOOP:
         FILL_PIXEL  COLOR                         
-        LOOP      COL_LOOP       
+        LOOP    COL_LOOP       
         INC     DX             
         CMP     DX, END_ROW     
         JB      ROW_LOOP        
 ENDM
 
-SWITCH_COLOR    MACRO
+SWITCH_COLOR   MACRO
         LOCAL  Case1, Case2, Case3, Case4, Done
 
         CMP    DX, 20          
@@ -78,25 +78,25 @@ ENDM
 .STACK 64
 
 .DATA
-    MESSAGE1      DB  '***** WELCOME *******$'
+    MESSAGE1      DB  '******* WELCOME *******$'
     MESSAGE2      DB  'Press Key To Start Application$'
+
+    POSITION_X1   DW  ?
+    POSITION_Y1   DW  ?
+    POSITION_X2   DW  ?
+    POSITION_Y2   DW  ?
+    DELTA_X       DW  ?
+    DELTA_Y       DW  ? 
+    X_DIRECTION   DW  ?
+    Y_DIRECTION   DW  ?
+    DECISION      DW  ?
 
     WHITE         EQU  0FH
     BLUE          EQU  09H
     GREEN         EQU  0AH
     RED           EQU  0CH
     BLACK         EQU  00H
-    PAINT_COLOR   DB  WHITE   
-
-    POS_X1        DW  ?
-    POS_Y1        DW  ?
-    POS_X2        DW  ?
-    POS_Y2        DW  ?
-    DELTA_X       DW  ?
-    DELTA_Y       DW  ? 
-    X_DIR         DW  ?
-    Y_DIR         DW  ?
-    DECISION      DW  ?
+    PAINT_COLOR   DB   WHITE   
 
 .CODE
 
@@ -108,9 +108,10 @@ ENDM
         SET_CURSOR  9, 24
         DISPLAY_MESSAGE MESSAGE1
         SET_CURSOR  20, 28
-        DISPLAY_MESSAGE 
+        DISPLAY_MESSAGE MESSAGE2
         
-    CHECK_KEY:        
+    CHECK_KEY: 
+
         MOV   AH, 01
         INT   16H
         JZ    CHECK_KEY
@@ -152,6 +153,7 @@ ENDM
         JB    SELECT_COLOR     
 
     HANDLE_CLICK:
+
         ;Check Left Click
         CMP   BX, 01H
         JE    RIGHT_CLICK
@@ -168,8 +170,8 @@ ENDM
     RIGHT_CLICK:
 
         ;Store Mouse Pos
-        MOV   [POS_X1], CX
-        MOV   [POS_Y1], DX
+        MOV   [POSITION_X1], CX
+        MOV   [POSITION_Y1], DX
 
     WAIT_RELEASE:
 
@@ -181,8 +183,8 @@ ENDM
 
         SHR   CX, 1
 
-        MOV   [POS_X2], CX
-        MOV   [POS_Y2], DX
+        MOV   [POSITION_X2], CX
+        MOV   [POSITION_Y2], DX
 
         CALL  DRAW_LINE
         JMP   PAINT_LOOP
@@ -235,15 +237,15 @@ DRAW_LINE  PROC  NEAR
         PUSHA               
 
         ; Calculate absolute deltas
-        MOV AX, [POS_X2]
-        SUB AX, [POS_X1]
+        MOV AX, [POSITION_X2]
+        SUB AX, [POSITION_X1]
         JNC CALC_DELTA_X
         NEG AX
     CALC_DELTA_X:
         MOV [DELTA_X], AX
 
-        MOV AX, [POS_Y2]
-        SUB AX, [POS_Y1]
+        MOV AX, [POSITION_Y2]
+        SUB AX, [POSITION_Y1]
         JNC CALC_DELTA_Y
         NEG AX
     CALC_DELTA_Y:
@@ -271,23 +273,23 @@ DRAW_HLINE  PROC  NEAR
         PUSHA
 
         ; Swap points if needed
-        MOV AX, [POS_X1]
-        CMP AX, [POS_X2]
+        MOV AX, [POSITION_X1]
+        CMP AX, [POSITION_X2]
         JL NO_SWAP_X
-        XCHG AX, [POS_X2]
-        MOV [POS_X1], AX
-        MOV AX, [POS_Y1]
-        XCHG AX, [POS_Y2]
-        MOV [POS_Y1], AX
+        XCHG AX, [POSITION_X2]
+        MOV [POSITION_X1], AX
+        MOV AX, [POSITION_Y1]
+        XCHG AX, [POSITION_Y2]
+        MOV [POSITION_Y1], AX
 
     NO_SWAP_X:
         ; Calculate dx and dy
-        MOV AX, [POS_X2]
-        SUB AX, [POS_X1]
+        MOV AX, [POSITION_X2]
+        SUB AX, [POSITION_X1]
         MOV [DELTA_X], AX
         
-        MOV AX, [POS_Y2]
-        SUB AX, [POS_Y1]
+        MOV AX, [POSITION_Y2]
+        SUB AX, [POSITION_Y1]
         MOV [DELTA_Y], AX
 
         ; Determine Y direction
@@ -297,7 +299,7 @@ DRAW_HLINE  PROC  NEAR
         NEG BX
         NEG AX
     Y_POSITIVE:
-        MOV [Y_DIR], BX
+        MOV [Y_DIRECTION], BX
         MOV [DELTA_Y], AX
 
         ; Initialize decision parameter
@@ -307,15 +309,15 @@ DRAW_HLINE  PROC  NEAR
         MOV [DECISION], AX
 
         ; Initialize coordinates
-        MOV CX, [POS_X1]
-        MOV DX, [POS_Y1]
+        MOV CX, [POSITION_X1]
+        MOV DX, [POSITION_Y1]
 
     DRAW_LOOP_H:
         ; Plot pixel
         FILL_PIXEL PAINT_COLOR
 
         ; Check end condition
-        CMP CX, [POS_X2]
+        CMP CX, [POSITION_X2]
         JE END_HLINE
 
         ; Update decision parameter
@@ -324,7 +326,7 @@ DRAW_HLINE  PROC  NEAR
         JL UPDATE_X
 
         ; Move in Y direction
-        ADD DX, [Y_DIR]
+        ADD DX, [Y_DIRECTION]
         SUB AX, [DELTA_X]
         SUB AX, [DELTA_X]
         MOV [DECISION], AX
@@ -342,30 +344,27 @@ DRAW_HLINE  PROC  NEAR
         RET
 DRAW_HLINE ENDP
 
-;----------------------------------
-; VERTICAL LINE ALGORITHM (|dy| >= |dx|)
-;----------------------------------
-DRAW_VERTICAL   PROC    NEAR
+;Draw Vertical Line
+DRAW_VERTICAL  PROC  NEAR
         PUSHA
 
-        ; Swap points if needed
-        MOV AX, [POS_Y1]
-        CMP AX, [POS_Y2]
+        MOV AX, [POSITION_Y1]
+        CMP AX, [POSITION_Y2]
         JL NO_SWAP_Y
-        XCHG AX, [POS_Y2]
-        MOV [POS_Y1], AX
-        MOV AX, [POS_X1]
-        XCHG AX, [POS_X2]
-        MOV [POS_X1], AX
+        XCHG AX, [POSITION_Y2]
+        MOV [POSITION_Y1], AX
+        MOV AX, [POSITION_X1]
+        XCHG AX, [POSITION_X2]
+        MOV [POSITION_X1], AX
 
     NO_SWAP_Y:
-        ; Calculate dx and dy
-        MOV AX, [POS_Y2]
-        SUB AX, [POS_Y1]
+        ; Calculate DX And DY
+        MOV AX, [POSITION_Y2]
+        SUB AX, [POSITION_Y1]
         MOV [DELTA_Y], AX
         
-        MOV AX, [POS_X2]
-        SUB AX, [POS_X1]
+        MOV AX, [POSITION_X2]
+        SUB AX, [POSITION_X1]
         MOV [DELTA_X], AX
 
         ; Determine X direction
@@ -375,7 +374,7 @@ DRAW_VERTICAL   PROC    NEAR
         NEG BX
         NEG AX
     X_POSITIVE:
-        MOV [X_DIR], BX
+        MOV [X_DIRECTION], BX
         MOV [DELTA_X], AX
 
         ; Initialize decision parameter
@@ -384,31 +383,31 @@ DRAW_VERTICAL   PROC    NEAR
         SUB AX, [DELTA_Y]
         MOV [DECISION], AX
 
-        ; Initialize coordinates
-        MOV CX, [POS_X1]
-        MOV DX, [POS_Y1]
+        ; Initialize Positions
+        MOV CX, [POSITION_X1]
+        MOV DX, [POSITION_Y1]
 
     DRAW_LOOP_V:
-        ; Plot pixel
         FILL_PIXEL PAINT_COLOR
 
-        ; Check end condition
-        CMP DX, [POS_Y2]
+        ;End Condition
+        CMP DX, [POSITION_Y2]
         JE END_VLINE
 
-        ; Update decision parameter
+        ;Update Decision
         MOV AX, [DECISION]
         CMP AX, 0
         JL UPDATE_Y
 
-        ; Move in X direction
-        ADD CX, [X_DIR]
+        ;Move in X direction
+        ADD CX, [X_DIRECTION]
         SUB AX, [DELTA_Y]
         SUB AX, [DELTA_Y]
         MOV [DECISION], AX
 
     UPDATE_Y:
-        ; Move in Y direction
+
+        ;Move in Y direction
         INC DX
         ADD AX, [DELTA_X]
         ADD AX, [DELTA_X]
@@ -416,6 +415,8 @@ DRAW_VERTICAL   PROC    NEAR
         JMP DRAW_LOOP_V
 
     END_VLINE:
+
         POPA
         RET
+
 DRAW_VERTICAL ENDP
