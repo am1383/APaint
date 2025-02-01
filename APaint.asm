@@ -44,3 +44,30 @@ DRAW_COLOR_BOX  MACRO   COLOR, START_ROW, END_ROW
         CMP     DX, END_ROW     
         JB      ROW_LOOP        
 ENDM
+
+CHOSE_COLOR    MACRO
+        LOCAL  Case1, Case2, Case3, Case4, Done
+
+        CMP    DX, 20          
+        JB     Case1
+        CMP    DX, 40          
+        JB     Case2
+        CMP    DX, 60          
+        JB     Case3
+        CMP    DX, 80          
+        JB     Case4
+        JMP    Done      
+
+    Case1:
+        MOV    PAINT_COLOR, WHITE
+        JMP    Done
+    Case2:
+        MOV    PAINT_COLOR, BLUE
+        JMP    Done
+    Case3:
+        MOV    PAINT_COLOR, GREEN
+        JMP    Done
+    Case4:
+        MOV    PAINT_COLOR, RED
+    Done:
+ENDM
