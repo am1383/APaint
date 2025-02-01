@@ -137,38 +137,39 @@ ENDM
 
     PAINT_LOOP:
     
-        MOV     AX, 03H      
-        INT     33H
-        AND     BX, 03H     
-        JZ      PAINT_LOOP  
+        MOV   AX, 03H      
+        INT   33H
+        AND   BX, 03H     
+        JZ    PAINT_LOOP  
         
         ;Video Mode For 320*200
-        SHR     CX, 1
+        SHR   CX, 1
 
         ;Switch To Target Color
-        CMP     CX, 0FH
-        JA      HANDLE_CLICK
-        CMP     DX, 81
-        JB      SELECT_COLOR     
+        CMP   CX, 0FH
+        JA    HANDLE_CLICK
+        CMP   DX, 81
+        JB    SELECT_COLOR     
 
     HANDLE_CLICK:
-            ;Check Left Click
-            CMP     BX, 01H
-            JE      RIGHT_CLICK
+        ;Check Left Click
+        CMP   BX, 01H
+        JE    RIGHT_CLICK
             
-            ;Check Right Click
-            CMP     BX, 02H
-            JE      LEFT_CLICK
+        ;Check Right Click
+        CMP   BX, 02H
+        JE    LEFT_CLICK
 
     SELECT_COLOR:
-            CHOSE_COLOR
-            JMP  PAINT_LOOP
+
+        CHOSE_COLOR
+        JMP  PAINT_LOOP
 
     RIGHT_CLICK:
 
         ;Store Mouse Pos
-        MOV [POS_X1], CX
-        MOV [POS_Y1], DX
+        MOV   [POS_X1], CX
+        MOV   [POS_Y1], DX
 
     WAIT_RELEASE:
 
@@ -179,3 +180,89 @@ ENDM
         JE    WAIT_RELEASE
 
         SHR   CX, 1
+
+        MOV   [POS_X2], CX
+        MOV   [POS_Y2], DX
+
+        CALL  DRAW_LINE
+        JMP   PAINT_LOOP
+
+    LEFT_CLICK:
+
+        CALL  ERASER
+        JMP   PAINT_LOOP
+
+    EXIT:
+
+        MOV   AH, 00H
+        MOV   AL, 03H
+        INT   10H
+
+        MOV   AH, 4CH
+        INT   21H
+MAIN    ENDP
+
+;Earaser Section
+;-------------------------------
+ERASER  PROC  NEAR
+        
+        FILL_PIXEL  BLACK
+        INC         CX
+        FILL_PIXEL  BLACK
+        INC         DX
+        FILL_PIXEL  BLACK
+        DEC         DX 
+        DEC         DX         
+        FILL_PIXEL  BLACK
+        DEC         CX
+        FILL_PIXEL  BLACK
+        DEC         CX
+        FILL_PIXEL  BLACK
+        INC         DX         
+        FILL_PIXEL  BLACK
+        INC         DX         
+        FILL_PIXEL  BLACK
+        INC         CX         
+        FILL_PIXEL  BLACK
+
+        RET 
+ERASER  ENDP
+
+;Draw Line Section
+;-------------------------------
+DRAW_LINE  PROC  NEAR
+        ; Save all registers
+        PUSHA               
+
+        ; Calculate absolute deltas
+        MOV AX, [POS_X2]
+        SUB AX, [POS_X1]
+        JNC CALC_DELTA_X
+        NEG AX
+    CALC_DELTA_X:
+        MOV [DELTA_X], AX
+
+        MOV AX, [POS_Y2]
+        SUB AX, [POS_Y1]
+        JNC CALC_DELTA_Y
+        NEG AX
+    CALC_DELTA_Y:
+        MOV [DELTA_Y], AX
+
+        ; Choose algorithm based on slope
+        MOV AX, [DELTA_X]
+        CMP AX, [DELTA_Y]
+        JG DRAW_HORIZONTAL
+
+        CALL DRAW_VERTICAL
+        JMP DRAW_EXIT
+
+    DRAW_HORIZONTAL:
+        CALL DRAW_HLINE
+
+    DRAW_EXIT:
+        ; Restore all registers
+        POPA         
+
+        RET
+DRAW_LINE ENDP
