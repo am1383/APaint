@@ -151,3 +151,12 @@ ENDM
         CMP     DX, 81
         JB      SELECT_COLOR     
 
+    HANDLE_CLICK:
+            ;Check Left Click
+            CMP     BX, 01H
+            JE      RIGHT_CLICK
+            
+            ;Check Right Click
+            CMP     BX, 02H
+            JE      LEFT_CLICK
+
