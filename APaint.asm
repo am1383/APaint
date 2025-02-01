@@ -71,3 +71,83 @@ CHOSE_COLOR    MACRO
         MOV    PAINT_COLOR, RED
     Done:
 ENDM
+;-------------------------------
+
+.MODEL SMALL
+
+.STACK 64
+
+.DATA
+    MESSAGE1      DB  '***** WELCOME *******$'
+    MESSAGE2      DB  'Press Key To Start Application$'
+
+    WHITE         EQU  0FH
+    BLUE          EQU  09H
+    GREEN         EQU  0AH
+    RED           EQU  0CH
+    BLACK         EQU  00H
+    PAINT_COLOR   DB  WHITE   
+
+    POS_X1        DW  ?
+    POS_Y1        DW  ?
+    POS_X2        DW  ?
+    POS_Y2        DW  ?
+    DELTA_X       DW  ?
+    DELTA_Y       DW  ? 
+    X_DIR         DW  ?
+    Y_DIR         DW  ?
+    DECISION      DW  ?
+
+.CODE
+
+    MAIN  PROC  FAR
+        MOV     AX, @DATA
+        MOV     DS, AX
+    
+        CLEAR_SCREEN
+        SET_CURSOR  9, 24
+        DISPLAY_MESSAGE MESSAGE1
+        SET_CURSOR  20, 28
+        DISPLAY_MESSAGE 
+        
+    CHECK_KEY:        
+        MOV   AH, 01
+        INT   16H
+        JZ    CHECK_KEY
+
+    CLEAR_SCREEN
+
+;Video Mode
+    MOV   AH, 0                   
+    MOV   AL, 13H
+    INT   10H      
+
+    DRAW_COLOR_BOX  WHITE, 0,  20
+    DRAW_COLOR_BOX  BLUE,  20, 40
+    DRAW_COLOR_BOX  GREEN, 40, 60
+    DRAW_COLOR_BOX  RED,   60, 80
+
+;Mouse Init
+    MOV   AX, 00H  
+    INT   33H 
+    CMP   AX, 00H        
+    JE    EXIT 
+    MOV   AX, 01H    
+    INT   33H
+
+    PAINT_LOOP:
+    
+        MOV     AX, 03H      
+        INT     33H
+        AND     BX, 03H     
+        JZ      PAINT_LOOP  
+        
+        ;Video Mode For 320*200
+        SHR     CX, 1
+
+        ;Switch To Target Color
+        CMP     CX, 0FH
+        JA      HANDLE_CLICK
+        CMP     DX, 81
+        JB      SELECT_COLOR     
+
