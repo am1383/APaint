@@ -332,7 +332,7 @@ DRAW_HLINE  PROC  NEAR
         CMP   AX, 0
         JL    UPDATE_X
 
-        ;Move in Y direction
+        ;Move Y Direction
         ADD   DX, [Y_DIRECTION]
         SUB   AX, [DELTA_X]
         SUB   AX, [DELTA_X]
@@ -340,7 +340,7 @@ DRAW_HLINE  PROC  NEAR
 
     UPDATE_X:
     
-        ;Move in X direction
+        ;Move X Direction
         INC   CX
         ADD   AX, [DELTA_Y]
         ADD   AX, [DELTA_Y]
