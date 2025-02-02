@@ -18,7 +18,7 @@ DISPLAY_MESSAGE  MACRO   MESSAGE
         MOV   AH, 09H
         INT   21H
 ENDM
-
+; Filling pixel with chosen color
 FILL_PIXEL  MACRO  COLOR
         MOV   AL, COLOR
         MOV   AH, 0CH
@@ -32,7 +32,7 @@ SET_CURSOR  MACRO  ROW COL
         MOV   DL, COL 
         INT   10H     
 ENDM
-
+;Draw Color box from START_ROW To END_ROW
 COLOR_BOX  MACRO  COLOR, START_ROW, END_ROW
         LOCAL   ROW_LOOP, COL_LOOP
         MOV     DX, START_ROW
@@ -45,8 +45,8 @@ COLOR_BOX  MACRO  COLOR, START_ROW, END_ROW
         CMP     DX, END_ROW     
         JB      ROW_LOOP        
 ENDM
-
-SWITCH_COLOR   MACRO  ;Macro For Switch Between Colors Between 4 Color
+;Macro For Switch Between Colors Between 4 Color
+SWITCH_COLOR   MACRO
         LOCAL  Case1, Case2, Case3, Case4, Done
 
         CMP    DX, 20          
