@@ -19,6 +19,12 @@ DISPLAY_MESSAGE  MACRO   MESSAGE
         INT   21H
 ENDM
 
+FILL_PIXEL  MACRO  COLOR
+        MOV   AL, COLOR
+        MOV   AH, 0CH
+        INT   10H
+ENDM
+
 SET_CURSOR  MACRO  ROW COL
         MOV   AH, 02H
         MOV   BH, 0   
@@ -27,13 +33,7 @@ SET_CURSOR  MACRO  ROW COL
         INT   10H     
 ENDM
 
-FILL_PIXEL  MACRO  COLOR
-        MOV   AL, COLOR
-        MOV   AH, 0CH
-        INT   10H
-ENDM
-
-DRAW_COLOR_BOX  MACRO  COLOR, START_ROW, END_ROW
+COLOR_BOX  MACRO  COLOR, START_ROW, END_ROW
         LOCAL   ROW_LOOP, COL_LOOP
         MOV     DX, START_ROW
     ROW_LOOP:
@@ -46,7 +46,7 @@ DRAW_COLOR_BOX  MACRO  COLOR, START_ROW, END_ROW
         JB      ROW_LOOP        
 ENDM
 
-SWITCH_COLOR   MACRO
+SWITCH_COLOR   MACRO  ;Macro For Switch Between Colors Between 4 Color
         LOCAL  Case1, Case2, Case3, Case4, Done
 
         CMP    DX, 20          
@@ -125,10 +125,10 @@ ENDM
     MOV   AL, 13H
     INT   10H      
 
-    DRAW_COLOR_BOX  WHITE, 0,  20
-    DRAW_COLOR_BOX  BLUE,  20, 40
-    DRAW_COLOR_BOX  GREEN, 40, 60
-    DRAW_COLOR_BOX  RED,   60, 80
+    COLOR_BOX  WHITE, 0,  20
+    COLOR_BOX  BLUE,  20, 40
+    COLOR_BOX  GREEN, 40, 60
+    COLOR_BOX  RED,   60, 80
 
     ;Mouse Init
     MOV   AX, 00H  
@@ -139,7 +139,7 @@ ENDM
     INT   33H
 
     FILL_PAINT:
-    
+        ;Mouse Button Status
         MOV   AX, 03H      
         INT   33H
         AND   BX, 03H     
@@ -148,7 +148,7 @@ ENDM
         ;Video Mode For 320*200
         SHR   CX, 1
 
-        ;Switch To Target Color
+        ;Switch To Target Color In Menu
         CMP   CX, 0FH
         JA    HANDLE_CLICK
         CMP   DX, 81
@@ -276,6 +276,9 @@ DRAW_LINE  PROC  NEAR
         RET
 DRAW_LINE ENDP
 
+
+;Draw Horizontal Line Section
+;-------------------------------
 DRAW_HLINE  PROC  NEAR
         PUSHA
 
