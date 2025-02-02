@@ -1,64 +1,72 @@
-🎨 APaint - Assembly Final Project
+# APaint - Assembly Final Project  
 
-APaint is a simple graphics-based drawing program written in x86 Assembly. It allows users to draw, erase, and switch between colors using a mouse interface in VGA mode 13h (320x200, 256 colors).
-📌 Features
+APaint is a simple graphics-based drawing program written in x86 Assembly. It provides a basic drawing interface using the mouse in VGA mode 13h (320x200, 256 colors).  
 
-✅ Graphical Mode (320x200, 256 colors)
-✅ Mouse Input Support
-✅ Color Selection (White, Blue, Green, Red)
-✅ Draw Lines (Using Bresenham’s Algorithm)
-✅ Erase Pixels
-✅ Custom Macros for Screen Control
-🛠 How It Works
-🎨 Drawing
+## Features  
 
-    Right Click: Selects the start point of a line.
-    Right Click Release: Selects the end point and draws a line using Bresenham’s Line Algorithm.
-    Left Click: Erases the pixel under the cursor.
+- **Graphical Mode** (320x200, 256 colors)  
+- **Mouse Input Support**  
+- **Color Selection** (White, Blue, Green, Red)  
+- **Line Drawing** (Bresenham’s Algorithm)  
+- **Pixel Erasing**  
+- **Custom Macros for Screen Control**  
 
-🎨 Color Selection
+## How It Works  
 
-    Click in the color palette area (top 80 rows of the screen) to change the current drawing color.
+### Drawing  
 
-🏗️ How to Run
-Requirements
+- **Right Click**: Selects the start point of a line.  
+- **Right Click Release**: Selects the end point and draws a line using Bresenham’s Algorithm.  
+- **Left Click**: Erases the pixel under the cursor.  
 
-🖥 DOSBox or an actual MS-DOS environment
-⚙️ TASM/MASM (for assembling the code)
-Steps
+### Color Selection  
 
-1️⃣ Assemble the code:
+Clicking in the color palette area (top 80 rows of the screen) changes the current drawing color.  
 
-tasm apaint.asm
-tlink apaint.obj
+## How to Run  
 
-2️⃣ Run the executable:
+### Requirements  
 
-apaint.exe
+- DOSBox or an actual MS-DOS environment  
+- TASM/MASM (for assembling the code)  
 
-🏗️ Project Structure
+### Steps  
 
-    Macros Section
-        CLEAR_SCREEN: Clears the screen.
-        DISPLAY_MESSAGE: Displays text on the screen.
-        SET_CURSOR: Moves the text cursor.
-        FILL_PIXEL: Draws a pixel at the current position.
-        DRAW_COLOR_BOX: Draws a block of color.
-        SWITCH_COLOR: Changes the paint color based on the cursor position.
+   ```sh
+   tasm apaint.asm
+   tlink apaint.obj
+   run apaint.exe
+```
+# Project Structure
 
-    Main Program (MAIN PROC)
-        Initializes the video mode and mouse driver.
-        Displays the welcome message.
-        Handles mouse input for drawing and erasing.
+Macros Section
+CLEAR_SCREEN: Clears the screen.
 
-    Functions
-        DRAW_LINE: Draws a line using Bresenham's Algorithm.
-        DRAW_HLINE: Handles horizontal lines.
-        DRAW_VERTICAL: Handles vertical lines.
-        ERASER: Clears pixels around the cursor.
+DISPLAY_MESSAGE: Displays text on the screen.
 
-📌 Future Improvements
+SET_CURSOR: Moves the text cursor.
 
-🔹 Save and Load drawings.
-🔹 More colors and shapes.
-🔹 Fill tool for coloring closed areas.
+FILL_PIXEL: Draws a pixel at the current position.
+
+DRAW_COLOR_BOX: Draws a block of color.
+
+SWITCH_COLOR: Changes the paint color based on the cursor position.
+
+Main Program (MAIN PROC)
+
+Initializes the video mode and mouse driver.
+
+Displays the welcome message.
+
+Handles mouse input for drawing and erasing.
+
+# Functions
+DRAW_LINE: Draws a line using Bresenham's Algorithm.
+
+DRAW_HLINE: Handles horizontal lines.
+
+DRAW_VERTICAL: Handles vertical lines.
+
+ERASER: Clears pixels around the cursor.
+
+Future Improvements
